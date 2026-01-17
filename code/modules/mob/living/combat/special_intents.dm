@@ -1081,6 +1081,7 @@ tile_coordinates = list(list(1,1), list(-1,1), list(-1,-1), list(1,-1),list(0,0)
 	howner.OffBalance(self_immob_dur)
 	howner.Immobilize(self_immob_dur)
 	animate(howner, pixel_z = pixel_z - 4, time = 3) // windup
+	dam = initial(dam)
 	playsound(howner, 'sound/combat/ground_smash_start.ogg', 100, TRUE)
 
 /datum/special_intent/upper_cut/apply_hit(turf/T)
@@ -1093,16 +1094,18 @@ tile_coordinates = list(list(1,1), list(-1,1), list(-1,-1), list(1,-1),list(0,0)
 		if(L != howner)
 		
 			var/throwtarget = get_edge_target_turf(howner, get_dir(howner, get_step_away(L, howner)))
-
+			var/throwdist = 1
+			var/target_zone = BODY_ZONE_CHEST
 
 			if(L.has_status_effect(/datum/status_effect/debuff/exposed)) // big damage and a knockdown if they exposed
 				L.Knockdown(KD_dur)
-				L.safe_throw_at(throwtarget, 4, 1, howner, force = MOVE_FORCE_EXTREMELY_STRONG)
+				throwdist = rand(2,4)
 				dam = 200 // big damage
-				apply_generic_weapon_damage(L, dam, "blunt", BODY_ZONE_HEAD, bclass = BCLASS_BLUNT, no_pen = TRUE)
+				target_zone = BODY_ZONE_HEAD
 				playsound(howner, 'sound/combat/tf2crit.ogg', 100, TRUE)
-			else
-				L.safe_throw_at(throwtarget, 1, 1, howner, force = MOVE_FORCE_EXTREMELY_STRONG) // small pushback and 50 damage on non exposed
-			apply_generic_weapon_damage(L, dam, "blunt", BODY_ZONE_CHEST, bclass = BCLASS_BLUNT, no_pen = TRUE)
+
+			apply_generic_weapon_damage(L, dam, "blunt", target_zone, bclass = BCLASS_BLUNT, no_pen = TRUE)
+			L.safe_throw_at(throwtarget, throwdist, 1, howner, force = MOVE_FORCE_EXTREMELY_STRONG) // small pushback and 50 damage on non exposed
+			
 			playsound(howner, 'sound/combat/hits/punch/punch_hard (2).ogg', 100, TRUE)
 	..()
